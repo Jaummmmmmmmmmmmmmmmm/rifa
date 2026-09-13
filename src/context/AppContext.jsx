@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialRaffles } from '../data/initialRaffles';
-import { getSupabaseRaffles, syncRaffleToSupabase } from '../services/supabase';
+import { getSupabaseRaffles, syncRaffleToSupabase, subscribeToHiluxRealtime } from '../services/supabase';
 
 const AppContext = createContext();
 
@@ -169,8 +169,17 @@ export const AppProvider = ({ children }) => {
     };
 
     window.addEventListener('storage', handleStorage);
+    
+    // Cloud Realtime WebSocket Listener (across different devices/browsers)
+    const unsubscribeCloud = subscribeToHiluxRealtime((data) => {
+      if (data && data.raffleId) {
+        setRaffles(prev => prev.map(r => r.id === data.raffleId ? { ...r, ...data.updates } : r));
+      }
+    });
+
     return () => {
       window.removeEventListener('storage', handleStorage);
+      if (typeof unsubscribeCloud === 'function') unsubscribeCloud();
     };
   }, [broadcastChannel]);
 
