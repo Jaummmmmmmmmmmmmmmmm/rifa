@@ -13,7 +13,11 @@ import {
   Sliders, 
   Calendar,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Wallet,
+  Banknote,
+  CheckCircle2,
+  ArrowUpRight
 } from 'lucide-react';
 
 export default function HiluxAdmin({ onBackToSite }) {
@@ -36,7 +40,7 @@ export default function HiluxAdmin({ onBackToSite }) {
   const [customInput, setCustomInput] = useState(String(hilux.soldCount || 3));
   const [showSavedToast, setShowSavedToast] = useState(false);
 
-  // Sync state if hilux updates from another tab
+  // Sync state if hilux updates from another tab or database
   useEffect(() => {
     if (hilux) {
       setSoldCount(hilux.soldCount || 0);
@@ -74,8 +78,17 @@ export default function HiluxAdmin({ onBackToSite }) {
     applyChanges(soldCount, organizerName, pricePerNumber);
   };
 
-  const totalRevenue = soldCount * (pricePerNumber || 10);
+  // Cálculos financeiros automáticos (ex: 5 rifas = R$ 50,00)
+  const unitPrice = Number(pricePerNumber) || 10;
+  const totalRevenue = soldCount * unitPrice;
+  const totalPotential = (hilux.totalNumbers || 10000) * unitPrice;
+  const remainingToCollect = Math.max(0, totalPotential - totalRevenue);
   const percentSold = ((soldCount / (hilux.totalNumbers || 10000)) * 100).toFixed(2);
+
+  const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { 
+    style: 'currency', 
+    currency: 'BRL' 
+  }).format(val);
 
   return (
     <div className="min-h-screen bg-[#070F18] text-slate-100 font-sans pb-20">
@@ -175,14 +188,14 @@ export default function HiluxAdmin({ onBackToSite }) {
 
           <div className="rounded-2xl border border-white/10 bg-[#0B1724] p-5 shadow-sm">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span>Arrecadado</span>
+              <span>Saldo Arrecadado</span>
               <DollarSign className="h-4 w-4 text-emerald-400" />
             </div>
             <div className="text-2xl sm:text-3xl font-black text-white">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRevenue)}
+              {formatCurrency(totalRevenue)}
             </div>
             <div className="text-[11px] text-slate-500 mt-1">
-              {pricePerNumber} BRL por bilhete
+              {unitPrice} BRL por bilhete
             </div>
           </div>
 
@@ -210,6 +223,150 @@ export default function HiluxAdmin({ onBackToSite }) {
             <div className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
               <Check className="h-3 w-3" /> Exibido no card do site
             </div>
+          </div>
+        </div>
+
+        {/* NOVA SEÇÃO: SALDO EM CONTA & CÁLCULOS AUTOMÁTICOS */}
+        <div className="rounded-3xl border-2 border-emerald-500/40 bg-gradient-to-br from-[#0B1D2C] via-[#091824] to-[#07131D] p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          
+          {/* Subtle glow in background */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 space-y-6">
+            
+            {/* Header with status */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg">
+                  <Wallet className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                      Painel de Saldo & Financeiro (Hilux)
+                    </h2>
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      Cálculo Automático
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Fórmula em tempo real: <strong className="text-emerald-300">{soldCount} cotas vendidas</strong> × <strong className="text-emerald-300">{formatCurrency(unitPrice)}</strong> = <strong className="text-emerald-400 font-black">{formatCurrency(totalRevenue)}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Botão de Saque */}
+              <button
+                onClick={() => {
+                  alert(`💰 Solicitação de Saque Pix iniciada!\n\nValor Disponível: ${formatCurrency(totalRevenue)}\nDestinatário: ${organizerName}\nChave Pix: Cadastrada para a campanha\n\nStatus: Saldo 100% liberado para liquidação.`);
+                }}
+                className="btn-shimmer flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-black text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 transition"
+              >
+                <ArrowUpRight className="h-4 w-4 stroke-[3]" />
+                <span>Solicitar Saque Pix</span>
+              </button>
+            </div>
+
+            {/* Big Balance Showcase */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              
+              {/* Saldo Total Disponível */}
+              <div className="md:col-span-2 rounded-2xl border border-emerald-500/30 bg-[#071420]/80 p-6 flex flex-col justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Saldo Líquido em Conta (Disponível para Pix):
+                </span>
+                
+                <div className="my-3 flex flex-wrap items-baseline gap-3">
+                  <span className="text-4xl sm:text-5xl font-black text-emerald-400 tracking-tight">
+                    {formatCurrency(totalRevenue)}
+                  </span>
+                  <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-300">
+                    {soldCount} cotas × {formatCurrency(unitPrice)}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-2 border-t border-white/5">
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Chave Pix ativa para {organizerName}
+                  </span>
+                  <span>•</span>
+                  <span>Sem taxa de bloqueio</span>
+                  <span>•</span>
+                  <span>Liquidação Pix Imediata</span>
+                </div>
+              </div>
+
+              {/* Meta Total & Projeção */}
+              <div className="rounded-2xl border border-white/10 bg-[#071420]/60 p-5 flex flex-col justify-between space-y-3">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                    Meta Financeira Total (100%):
+                  </span>
+                  <span className="text-2xl font-extrabold text-white">
+                    {formatCurrency(totalPotential)}
+                  </span>
+                  <span className="text-[11px] text-slate-500 block mt-0.5">
+                    10.000 cotas a {formatCurrency(unitPrice)}
+                  </span>
+                </div>
+
+                <div className="pt-3 border-t border-white/10">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-400">Falta arrecadar:</span>
+                    <span className="font-bold text-amber-400">
+                      {formatCurrency(remainingToCollect)}
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min(100, Number(percentSold))}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Calculadora / Tabela de Exemplos Rápidos com Cálculo Automático */}
+            <div className="rounded-2xl border border-white/5 bg-[#050D15] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <Banknote className="h-3.5 w-3.5 text-emerald-400" />
+                  Calculadora Rápida (Clique para simular vendas e saldo na hora):
+                </span>
+                <span className="text-[11px] text-slate-500 hidden sm:inline">
+                  Atualiza as vendas e o saldo em tempo real
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                {[
+                  { qty: 5, label: '5 Rifas', val: formatCurrency(5 * unitPrice) },
+                  { qty: 10, label: '10 Rifas', val: formatCurrency(10 * unitPrice) },
+                  { qty: 50, label: '50 Rifas', val: formatCurrency(50 * unitPrice) },
+                  { qty: 100, label: '100 Rifas', val: formatCurrency(100 * unitPrice) },
+                  { qty: 409, label: '409 Rifas', val: formatCurrency(409 * unitPrice) },
+                  { qty: 1000, label: '1.000 Rifas', val: formatCurrency(1000 * unitPrice) }
+                ].map((item) => (
+                  <button
+                    key={item.qty}
+                    onClick={() => applyChanges(item.qty)}
+                    className={`rounded-xl border p-2.5 text-left transition active:scale-95 flex flex-col justify-between ${
+                      soldCount === item.qty
+                        ? 'border-emerald-500 bg-emerald-500/20 text-white shadow-md'
+                        : 'border-white/10 bg-white/5 text-slate-300 hover:border-emerald-500/40 hover:bg-emerald-500/10'
+                    }`}
+                  >
+                    <span className="text-[11px] font-semibold text-slate-400">{item.label}</span>
+                    <span className="text-sm font-black text-emerald-400">{item.val}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -323,7 +480,7 @@ export default function HiluxAdmin({ onBackToSite }) {
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
                   className="flex-1 rounded-xl border border-white/15 bg-[#070F18] px-4 py-2.5 text-sm font-bold text-white focus:border-emerald-500 focus:outline-none"
-                  placeholder="Ex: 3"
+                  placeholder="Ex: 5"
                 />
                 <button
                   onClick={() => applyChanges(customInput)}
@@ -341,28 +498,28 @@ export default function HiluxAdmin({ onBackToSite }) {
               </label>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => applyChanges(3)}
+                  onClick={() => applyChanges(5)}
                   className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 transition"
                 >
-                  ⚡ 3 Vendas
+                  ⚡ 5 Vendas (R$ 50,00)
                 </button>
                 <button
                   onClick={() => applyChanges(10)}
                   className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition"
                 >
-                  10 Vendas
+                  10 Vendas (R$ 100)
                 </button>
                 <button
                   onClick={() => applyChanges(50)}
                   className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition"
                 >
-                  50 Vendas
+                  50 Vendas (R$ 500)
                 </button>
                 <button
                   onClick={() => applyChanges(100)}
                   className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition"
                 >
-                  100 Vendas (1%)
+                  100 Vendas (R$ 1.000)
                 </button>
                 <button
                   onClick={() => applyChanges(0)}
@@ -466,7 +623,7 @@ export default function HiluxAdmin({ onBackToSite }) {
               </span>
               <span className="flex items-center gap-1 text-slate-400">
                 <span className="h-3 w-3 rounded bg-emerald-500/20 border border-emerald-500/40" />
-                Disponível ({10000 - soldCount})
+                Disponível ({Math.max(0, 10000 - soldCount)})
               </span>
             </div>
           </div>
