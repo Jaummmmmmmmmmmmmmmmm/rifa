@@ -36,25 +36,46 @@ export const AppProvider = ({ children }) => {
     return initialRaffles;
   });
 
-  // Try fetching from Supabase on mount
-  useEffect(() => {
-    async function loadRemote() {
+  // Helper to sync from remote Supabase
+  const syncFromRemote = async () => {
+    try {
       const remote = await getSupabaseRaffles();
       if (remote && remote.length > 0) {
         setRaffles(prev => {
-          // Merge remote with initial (preserving Hilux id 7777 at top)
           const remoteMap = new Map(remote.map(r => [r.id, r]));
+          let hasChanges = false;
+
           const merged = prev.map(p => {
-            if (p.id === 7777) {
-              return { ...p, organizerName: 'Jonathan', soldCount: Math.max(p.soldCount || 0, 3) };
+            const remoteItem = remoteMap.get(p.id);
+            if (remoteItem) {
+              if (
+                p.soldCount !== remoteItem.soldCount ||
+                p.organizerName !== remoteItem.organizerName ||
+                p.pricePerNumber !== remoteItem.pricePerNumber
+              ) {
+                hasChanges = true;
+              }
+              return { ...p, ...remoteItem };
             }
-            return remoteMap.get(p.id) || p;
+            return p;
           });
+
+          if (hasChanges) {
+            try {
+              localStorage.setItem('raffles_data_v4', JSON.stringify(merged));
+            } catch (e) {}
+          }
           return merged;
         });
       }
-    }
-    loadRemote();
+    } catch (err) {}
+  };
+
+  // Poll Supabase on mount and every 1.5 seconds for instant multi-device sync
+  useEffect(() => {
+    syncFromRemote();
+    const interval = setInterval(syncFromRemote, 1500);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
