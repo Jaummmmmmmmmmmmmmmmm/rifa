@@ -1,6 +1,22 @@
 // Dados de rifas reais da RiffaDigital
 export const initialRaffles = [
   {
+    id: 7777,
+    name: "Toyota Hilux 2.8 Turbo 4x4 Diesel Automática",
+    description: "Toyota Hilux 2.8 4x4 Diesel Automática, cabine dupla, cor branca, interior em couro impecável, tração 4x4 com reduzida, central multimídia, pneus novos, manual e chave reserva. Sorteio pela Loteria Federal!",
+    pricePerNumber: 10,
+    promotionPricePerNumber: null,
+    totalNumbers: 10000,
+    soldCount: 4820,
+    imageUrl: "/hilux-rifa.jpg",
+    organizerName: "João Organizador",
+    drawDate: "2026-10-31",
+    status: "active",
+    winningNumber: null,
+    whatsapp: "11999999999",
+    category: "today"
+  },
+  {
     "id": 2733,
     "name": "CHÁ RIFA - Ingrid e Daniel",
     "description": "Queridos amigos e família, estamos preparando cada detalhe do nosso grande dia com muito carinho e pensamos em uma forma diferente (e super divertida!) de comemorar com vocês: um Chá Rifa!  🎁 Como funciona?  No lugar do tradicional chá de panela, faremos uma reunião online com o sorteio da rifa. Até lá, você terá a oportunidade de escolher seus números. O valor arrecadado nos ajudará na montagem do nosso lar e nos preparativos do casamento.  ❓ E o prêmio?  É um prêmio surpresa especial! O sortudo ou sortuda vai levar para casa o mesmo presente incrível que preparamos com tanto carinho para os nossos padrinhos e madrinhas.  🤔 Posso adquirir mais de um número na rifa? Sim!! Quanto mais números reservar, maior a sua chance de ganhar!  🎟️ Como participar:  Valor por número: R$ 30  Chave PIX: (21) 97279-2887  Data do sorteio: 20/09/2026 (Domingo)  Garantam seus números e venham fazer parte desse momento tão especial com a gente!",

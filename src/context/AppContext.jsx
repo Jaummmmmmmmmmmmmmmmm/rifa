@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialRaffles } from '../data/initialRaffles';
+import { getSupabaseRaffles, syncRaffleToSupabase } from '../services/supabase';
 
 const AppContext = createContext();
 
@@ -29,15 +30,31 @@ export const AppProvider = ({ children }) => {
   // Raffles state
   const [raffles, setRaffles] = useState(() => {
     try {
-      const saved = localStorage.getItem('raffles_data');
+      const saved = localStorage.getItem('raffles_data_v2');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return initialRaffles;
   });
 
+  // Try fetching from Supabase on mount
+  useEffect(() => {
+    async function loadRemote() {
+      const remote = await getSupabaseRaffles();
+      if (remote && remote.length > 0) {
+        setRaffles(prev => {
+          // Merge remote with initial (preserving Hilux id 7777 at top)
+          const remoteMap = new Map(remote.map(r => [r.id, r]));
+          const merged = prev.map(p => remoteMap.get(p.id) || p);
+          return merged;
+        });
+      }
+    }
+    loadRemote();
+  }, []);
+
   useEffect(() => {
     try {
-      localStorage.setItem('raffles_data', JSON.stringify(raffles));
+      localStorage.setItem('raffles_data_v2', JSON.stringify(raffles));
     } catch (e) {}
   }, [raffles]);
 
@@ -78,6 +95,7 @@ export const AppProvider = ({ children }) => {
       ...newRaffle
     };
     setRaffles(prev => [raffleObj, ...prev]);
+    syncRaffleToSupabase(raffleObj);
     return raffleObj;
   };
 
@@ -86,11 +104,13 @@ export const AppProvider = ({ children }) => {
     setRaffles(prev => prev.map(r => {
       if (r.id === raffleId) {
         const newSold = Math.min(r.totalNumbers, (r.soldCount || 0) + count);
-        return {
+        const updated = {
           ...r,
           soldCount: newSold,
           buyers: [...(r.buyers || []), { ...buyerData, count, date: new Date().toISOString() }]
         };
+        syncRaffleToSupabase(updated);
+        return updated;
       }
       return r;
     }));
