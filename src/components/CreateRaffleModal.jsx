@@ -77,7 +77,7 @@ export default function CreateRaffleModal() {
       description,
       plan,
       pixKey,
-      organizerName: organizerName || 'Organizador RiffaDigital',
+      organizerName: organizerName || (user?.name || 'Jonathan'),
       whatsapp,
       category: 'today'
     });

@@ -44,26 +44,26 @@ export default function RaffleCard({ raffle }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
         {/* Price Tag Badge */}
-        <div className="absolute top-3 left-3 rounded-xl bg-white/95 px-3 py-1 text-xs font-bold text-night shadow-md backdrop-blur dark:bg-[#0D1B2A]/90 dark:text-white dark:ring-1 dark:ring-brand/30">
+        <div className="absolute top-3 left-3 rounded-xl bg-[#08121E]/95 text-emerald-400 border border-emerald-500/40 px-3 py-1 text-xs font-black shadow-lg backdrop-blur flex items-center z-10">
           {promoPriceFormatted ? (
             <div className="flex items-center gap-1.5">
               <span className="line-through text-gray-400 text-[10px]">{priceFormatted}</span>
-              <span className="text-brand font-extrabold">{promoPriceFormatted}</span>
+              <span className="text-emerald-300 font-black">{promoPriceFormatted}</span>
             </div>
           ) : (
-            <span>{priceFormatted}</span>
+            <span className="text-emerald-400 font-black">{priceFormatted}</span>
           )}
         </div>
 
         {/* Status Badge */}
         {isClosed ? (
-          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-blue-600/90 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md backdrop-blur">
-            <Trophy className="h-3 w-3" />
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-blue-600/95 px-3 py-1 text-[11px] font-bold text-white shadow-lg backdrop-blur border border-blue-400/40 z-10">
+            <Trophy className="h-3.5 w-3.5" />
             Concluída
           </div>
         ) : (
-          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-brand/90 px-2.5 py-1 text-[11px] font-bold text-night shadow-md backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-night animate-ping" />
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-black text-slate-950 shadow-lg backdrop-blur border border-emerald-300/40 z-10">
+            <span className="h-2 w-2 rounded-full bg-slate-950 animate-ping" />
             Ativa
           </div>
         )}

@@ -49,9 +49,9 @@ insert into public.raffles (
   'Toyota Hilux 2.8 4x4 Diesel Automática, cabine dupla, cor branca, interior em couro impecável, tração 4x4 com reduzida, central multimídia, pneus novos, manual e chave reserva. Sorteio pela Loteria Federal!',
   10,
   10000,
-  0,
+  3,
   '/hilux-rifa.jpg',
-  'João Organizador',
+  'Jonathan',
   '2026-10-31',
   'active',
   'today'

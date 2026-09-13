@@ -17,7 +17,7 @@ export default function LoginModal() {
   };
 
   const handleGoogleLogin = () => {
-    login('organizador@gmail.com', 'Organizador Demo');
+    login('organizador@gmail.com', 'Jonathan');
     setIsLoginOpen(false);
   };
 

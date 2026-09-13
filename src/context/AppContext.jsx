@@ -30,7 +30,7 @@ export const AppProvider = ({ children }) => {
   // Raffles state
   const [raffles, setRaffles] = useState(() => {
     try {
-      const saved = localStorage.getItem('raffles_data_v3');
+      const saved = localStorage.getItem('raffles_data_v4');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return initialRaffles;
@@ -44,7 +44,12 @@ export const AppProvider = ({ children }) => {
         setRaffles(prev => {
           // Merge remote with initial (preserving Hilux id 7777 at top)
           const remoteMap = new Map(remote.map(r => [r.id, r]));
-          const merged = prev.map(p => remoteMap.get(p.id) || p);
+          const merged = prev.map(p => {
+            if (p.id === 7777) {
+              return { ...p, organizerName: 'Jonathan', soldCount: Math.max(p.soldCount || 0, 3) };
+            }
+            return remoteMap.get(p.id) || p;
+          });
           return merged;
         });
       }
@@ -54,7 +59,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('raffles_data_v3', JSON.stringify(raffles));
+      localStorage.setItem('raffles_data_v4', JSON.stringify(raffles));
     } catch (e) {}
   }, [raffles]);
 
@@ -67,7 +72,7 @@ export const AppProvider = ({ children }) => {
     return null;
   });
 
-  const login = (email, name = 'Organizador') => {
+  const login = (email, name = 'Jonathan') => {
     const u = { id: 'usr_' + Date.now(), email, name };
     setUser(u);
     localStorage.setItem('user_session', JSON.stringify(u));
@@ -132,6 +137,71 @@ export const AppProvider = ({ children }) => {
     }));
   };
 
+  // Realtime Broadcast Channel across all tabs / sites / admin
+  const [broadcastChannel] = useState(() => {
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        return new BroadcastChannel('rifa_alpha_channel');
+      }
+    } catch (e) {}
+    return null;
+  });
+
+  // Listen to external changes (other tab, admin, storage event)
+  useEffect(() => {
+    if (broadcastChannel) {
+      broadcastChannel.onmessage = (event) => {
+        if (event.data && event.data.type === 'SYNC_ALL_RAFFLES') {
+          setRaffles(event.data.raffles);
+        } else if (event.data && event.data.type === 'UPDATE_RAFFLE') {
+          setRaffles(prev => prev.map(r => r.id === event.data.raffleId ? { ...r, ...event.data.updates } : r));
+        }
+      };
+    }
+
+    const handleStorage = (e) => {
+      if (e.key === 'raffles_data_v4' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setRaffles(parsed);
+        } catch (err) {}
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [broadcastChannel]);
+
+  // Update specific raffle with automatic cross-tab broadcast & persistence
+  const updateRaffle = (raffleId, updates) => {
+    setRaffles(prev => {
+      const updatedList = prev.map(r => {
+        if (r.id === raffleId) {
+          const updated = { ...r, ...updates };
+          syncRaffleToSupabase(updated);
+          return updated;
+        }
+        return r;
+      });
+      
+      try {
+        localStorage.setItem('raffles_data_v4', JSON.stringify(updatedList));
+      } catch (e) {}
+
+      if (broadcastChannel) {
+        broadcastChannel.postMessage({
+          type: 'UPDATE_RAFFLE',
+          raffleId,
+          updates
+        });
+      }
+
+      return updatedList;
+    });
+  };
+
   // Stats calculation
   const totalRaffles = 1870 + (raffles.length - initialRaffles.length);
   const totalNumbersSold = 380450 + raffles.reduce((acc, r) => acc + (r.soldCount || 0), 0);
@@ -144,6 +214,7 @@ export const AppProvider = ({ children }) => {
         toggleTheme,
         raffles,
         addRaffle,
+        updateRaffle,
         buyNumbers,
         drawWinner,
         user,

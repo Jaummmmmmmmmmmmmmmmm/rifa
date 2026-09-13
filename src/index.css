@@ -124,3 +124,16 @@ body {
   -webkit-backdrop-filter: blur(8px);
   background-color: rgba(13, 27, 42, 0.75);
 }
+
+.text-night {
+  color: #0D1B2A !important;
+}
+
+.bg-night {
+  background-color: #0D1B2A !important;
+}
+
+.text-brand {
+  color: #00C07F !important;
+}
+

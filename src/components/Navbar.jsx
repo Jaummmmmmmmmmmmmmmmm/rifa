@@ -18,10 +18,11 @@ import {
   Menu, 
   X,
   MessageCircle,
-  Bell
+  Bell,
+  ShieldCheck
 } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ onGoToAdmin }) {
   const { 
     theme, 
     toggleTheme, 
@@ -205,6 +206,16 @@ export default function Navbar() {
               </button>
             )}
 
+            {/* Admin Hilux Shortcut */}
+            <button
+              onClick={onGoToAdmin}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition"
+              title="Gerenciar vendas da Hilux em tempo real"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Admin Hilux</span>
+            </button>
+
             {/* Criar Rifa CTA Button */}
             <button
               onClick={() => setIsCreateOpen(true)}
@@ -277,7 +288,14 @@ export default function Navbar() {
               <MessageCircle className="h-4 w-4 text-brand" />
               Suporte & Chat
             </button>
-            <div className="pt-2 border-t border-gray-100 dark:border-white/10">
+            <div className="pt-2 border-t border-gray-100 dark:border-white/10 space-y-2">
+              <button
+                onClick={() => { setMobileMenuOpen(false); onGoToAdmin?.(); }}
+                className="w-full flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-sm font-bold text-emerald-400"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Admin Hilux (/rifa-alpha/admin)
+              </button>
               <button
                 onClick={() => { setMobileMenuOpen(false); setIsLoginOpen(true); }}
                 className="w-full flex items-center justify-center rounded-xl border border-brand/20 bg-brand-soft/40 py-2.5 text-sm font-semibold text-brand dark:text-glow"
