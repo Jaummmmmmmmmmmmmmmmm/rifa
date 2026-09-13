@@ -7,7 +7,7 @@ export const initialRaffles = [
     pricePerNumber: 10,
     promotionPricePerNumber: null,
     totalNumbers: 10000,
-    soldCount: 4820,
+    soldCount: 0,
     imageUrl: "/hilux-rifa.jpg",
     organizerName: "João Organizador",
     drawDate: "2026-10-31",

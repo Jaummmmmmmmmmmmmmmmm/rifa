@@ -30,7 +30,7 @@ export const AppProvider = ({ children }) => {
   // Raffles state
   const [raffles, setRaffles] = useState(() => {
     try {
-      const saved = localStorage.getItem('raffles_data_v2');
+      const saved = localStorage.getItem('raffles_data_v3');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return initialRaffles;
@@ -54,7 +54,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('raffles_data_v2', JSON.stringify(raffles));
+      localStorage.setItem('raffles_data_v3', JSON.stringify(raffles));
     } catch (e) {}
   }, [raffles]);
 
